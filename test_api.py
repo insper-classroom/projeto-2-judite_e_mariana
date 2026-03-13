@@ -1,8 +1,16 @@
 from servidor import *
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 import pytest
 import json
 import requests
+
+@pytest.fixture
+# Cria um cliente de teste para a API
+def client():
+    app.config['TESTING'] = True
+    with app.test_client() as client:
+        yield client
+
 
 DICIONARIO_IMOVEIS = [
         {
@@ -38,3 +46,27 @@ def test_listar_imoveis():
         assert response.status_code == 200
         for k in response_json.keys():
             assert response_json[k] == DICIONARIO_IMOVEIS[0][k]
+
+
+def test_get_imovel_por_id_existente(client):
+    # Teste retorna 200 com os atributos do imóvel
+
+    with patch('servidor.connect_db') as mock_connect_db:
+
+        # Mock para a conexão e o cursor
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+
+        # Mock para retornar o cursor quando chamarmos conn.cursor()
+        mock_connect_db.return_value = mock_conn
+        mock_conn.cursor.return_value = mock_cursor
+
+        # Simula o banco retornando o primeiro imóvel
+        mock_cursor.fetchone.return_value = DICIONARIO_IMOVEIS[0]
+
+        # Faz a requisição para a API
+        response = client.get("/imoveis/1")
+
+    # Verifica a resposta
+    assert response.status_code == 200
+    assert response.get_json() == DICIONARIO_IMOVEIS[0]
