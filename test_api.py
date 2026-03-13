@@ -1,5 +1,8 @@
 from servidor import *
 from unittest.mock import patch
+import pytest
+import json
+import requests
 
 DICIONARIO_IMOVEIS = [
         {
@@ -25,3 +28,13 @@ DICIONARIO_IMOVEIS = [
             'data_aquisicao': '2021-11-30',  
         }
 ]
+
+
+#testar função que lista todos os imoveis e seus atributos
+def test_listar_imoveis():
+    with patch('servidor.listar_imoveis', DICIONARIO_IMOVEIS):
+        response = client.get('/imoveis')
+        response_json = response.get_json()
+        assert response.status_code == 200
+        for k in response_json.keys():
+            assert response_json[k] == DICIONARIO_IMOVEIS[0][k]
