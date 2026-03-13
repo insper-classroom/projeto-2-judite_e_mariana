@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, redirect
 import os
 import mysql.connector
 from mysql.connector import Error
