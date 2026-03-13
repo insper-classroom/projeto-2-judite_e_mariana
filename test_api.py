@@ -47,6 +47,13 @@ def test_listar_imoveis():
         for k in response_json.keys():
             assert response_json[k] == DICIONARIO_IMOVEIS[0][k]
 
+def test_list_imoveis_faltando_atributos():
+    with patch('servidor.listar_imoveis', DICIONARIO_IMOVEIS):
+        response = client.get('/imoveis')
+        response_json = response.get_json()
+        assert response.status_code == 200
+        for k in response_json.keys():
+            assert k in DICIONARIO_IMOVEIS[0]
 
 def test_get_imovel_por_id_existente(client):
     # Teste retorna 200 com os atributos do imóvel
