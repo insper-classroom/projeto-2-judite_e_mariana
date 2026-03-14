@@ -60,11 +60,11 @@ def test_get_imoveis(mock_connect_db, client):
     #verificando se o código de status retornou 200
     assert response.status_code == 200
     
-    # Verificandos se os dados retornados estão corretos
+    # Verificando se os dados retornados estão corretos
     expected_response = DICIONARIO_IMOVEIS
     assert response.get_json() == expected_response
 
-    # Verificandos se a consulta SQL foi executada corretamente
+    # Verificando se a consulta SQL foi executada corretamente
     mock_cursor.execute.assert_called_once_with("SELECT * FROM imoveis")
 
 @patch("servidor.connect_db")
@@ -79,10 +79,10 @@ def test_get_imoveis_vazio(mock_connect_db, client):
 
     mock_connect_db.return_value = mock_conn
 
-    # Fazendos a requisição para a API
+    # Fazendo a requisição para a API
     response = client.get("/imoveis")
 
-    # Verificandos se o código de status da resposta é 404 e se a mensagem de erro está correta
+    # Verificando se o código de status da resposta é 404 e se a mensagem de erro está correta
     assert response.status_code == 404
     assert response.get_json() == {"erro": "Nenhum imovel encontrado"}
     
@@ -140,7 +140,7 @@ def test_new_imovel(mock_connect_db, client):
     # verificando se o código de status retornou 200
     assert response.status_code == 200
     
-    # Verificandos se os dados retornados estão corretos
+    # Verificando se os dados retornados estão corretos
     expected_response = {
         'id': int(3),
         'logradouro': 'Taylor Ranch',
@@ -170,5 +170,33 @@ def test_new_imovel(mock_connect_db, client):
         )
     )
     
-    # Verificandos se a transação foi confirmada
+    # Verificando se a transação foi confirmada
     mock_conn.commit.assert_called_once()
+    
+@patch("servidor.connect_db")
+def test_new_imovel_vazio(mock_connect_db, client):
+    # Criandos um Mock para a conexão e o cursor
+    mock_conn = MagicMock()
+    mock_cursor = MagicMock()
+    
+    # Configurandos o Mock para retornar o cursor quando chamarmos conn.cursor()
+    mock_conn.cursor.return_value = mock_cursor
+    
+    # Substituíndo a função `connect_db` para retornar nosso Mock em vez de uma conexão real
+    mock_connect_db.return_value = mock_conn
+    
+    # Dados vazios que serão enviados para a API
+    new_imovel_vazio = {}
+    
+    # Fazendo requisição para a api
+    response = client.post('/submit', json=new_imovel_vazio)
+    
+    # verificando se o código de status retornou 400
+    assert response.status_code == 400
+    
+    # Verificando se os dados retornados estão corretos
+    expected_response = {"erro": "Dados incompletos"}
+    assert response.get_json() == expected_response
+    
+    # Verificando se nenhuma consulta SQL foi executada
+    mock_cursor.execute.assert_not_called()
