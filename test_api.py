@@ -11,7 +11,7 @@ def client():
     with app.test_client() as client:
         yield client
 
-
+# variavel global para simular o banco de dados
 DICIONARIO_IMOVEIS = [
         {
             'id': int(1),
@@ -40,18 +40,29 @@ DICIONARIO_IMOVEIS = [
 
 #testar função que lista todos os imoveis e seus atributos
 def test_listar_imoveis(client):
+    #mockando db
    with patch('servidor.imoveis', return_value=DICIONARIO_IMOVEIS):
+       #pegando resposta da api
         response = client.get('/imoveis')
         response_json = response.get_json()
 
+        #verificando se o código de status retornou 200
         assert response.status_code == 200
+        
+        #verificando se a api listou corretamente os imoveis
         assert response_json['imoveis'] == DICIONARIO_IMOVEIS
 
 def test_list_imoveis_faltando_atributos(client):
+    #mockando db
     with patch('servidor.imoveis', return_value=DICIONARIO_IMOVEIS):
+        #pegando resposta da api
         response = client.get('/imoveis')
         response_json = response.get_json()
+        
+        #verificando se o código de status retornou 200
         assert response.status_code == 200
+        
+        #verificando se a api listou faltando algum atributo do imovel
         for k in response_json['imoveis'][0].keys():
             assert k in DICIONARIO_IMOVEIS[0]
 
@@ -77,3 +88,5 @@ def test_get_imovel_por_id_existente(client):
     # Verifica a resposta
     assert response.status_code == 200
     assert response.get_json() == DICIONARIO_IMOVEIS[0]
+    
+    

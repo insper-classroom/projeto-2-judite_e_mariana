@@ -2,6 +2,7 @@ from select import select
 import os
 import mysql.connector
 
+# função para conectar ao banco de dados
 def conect_db():
     return mysql.connector.connect(
         host=os.getenv('DB_HOST'),
@@ -12,11 +13,15 @@ def conect_db():
     )
 
 def list_imoveis():
+    #conecta ao db
     conn = conect_db()
     cursor = conn.cursor()
+    
+    #seleciona os imoveis do banco de dados
     cursor.execute("SELECT * FROM imoveis")
     rows = cursor.fetchall()
     
+    #formata como dicionario a lista de imoveis
     colunas = [desc[0] for desc in cursor.description]
     imoveis = [dict(zip(colunas, row)) for row in rows]
     

@@ -37,5 +37,6 @@ def connect_db():
 
 @app.route('/imoveis', methods=['GET'])
 def listar_imoveis():
+    #pega o dicionario de imoveis e retorna ele com status code 200
     dados_imoveis = imoveis()
     return {'imoveis': dados_imoveis}, 200
