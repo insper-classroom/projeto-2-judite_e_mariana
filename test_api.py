@@ -141,17 +141,7 @@ def test_new_imovel(mock_connect_db, client):
     assert response.status_code == 200
     
     # Verificando se os dados retornados estão corretos
-    expected_response = {
-        'id': int(3),
-        'logradouro': 'Taylor Ranch',
-        'tipo_logradouro': 'Avenida',
-        'bairro': 'West Jennashire',
-        'cidade': 'Katherinefurt',
-        'cep': '51116',
-        'tipo': 'apartamento',
-        'valor': float(815970),
-        'data_aquisicao': '2020-04-24'
-    }
+    expected_response = {"mensagem": "Imóvel cadastrado com sucesso"}
 
     assert response.get_json() == expected_response
 

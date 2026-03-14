@@ -70,6 +70,30 @@ def get_imoveis():
     conn.close()
     return {"imoveis": imoveis}, 200
 
+@app.route('/submit', methods=['POST'])
+def new_imovel():
+    # verifica se os dados estão incompletos antes de acessar o banco de dados
+    if not request.json or request.json.get('logradouro') == '' or request.json.get('tipo_logradouro') == '' or request.json.get('bairro') == '' or request.json.get('cidade') == '' or request.json.get('cep') == '' or request.json.get('tipo') == '' or request.json.get('valor') == '' or request.json.get('data_aquisicao') == '':
+        return {"erro": "Dados incompletos"}, 400
+    
+    #conecta ao db
+    conn = connect_db()
+    
+    if conn is None:
+        return {"erro": "Erro ao conectar ao banco de dados"}, 500
+    
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO imoveis (logradouro, tipo_logradouro, bairro, cidade, cep, tipo, valor, data_aquisicao) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                   (request.json['logradouro'], request.json['tipo_logradouro'], request.json['bairro'], request.json['cidade'], request.json['cep'], request.json['tipo'], request.json['valor'], request.json['data_aquisicao']))
+    
+    if request.json['logradouro'] == '' or request.json['tipo_logradouro'] == '' or request.json['bairro'] == '' or request.json['cidade'] == '' or request.json['cep'] == '' or request.json['tipo'] == '' or request.json['valor'] == '' or request.json['data_aquisicao'] == '':
+        return {"erro": "Dados incompletos"}, 400
+    
+    conn.commit()
+    conn.close()
+    return {"mensagem": "Imóvel cadastrado com sucesso"}, 200
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
