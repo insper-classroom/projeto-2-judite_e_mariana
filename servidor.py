@@ -5,6 +5,9 @@ from mysql.connector import Error
 from dotenv import load_dotenv
 from views import *
 
+app = Flask(__name__)
+
+
 # Carrega as variáveis de ambiente do arquivo .cred (se disponível)
 load_dotenv('.cred')
 
@@ -32,5 +35,7 @@ def connect_db():
         print(f"Erro: {err}")
         return None
 
-
-app = Flask(__name__)
+@app.route('/imoveis', methods=['GET'])
+def listar_imoveis():
+    dados_imoveis = imoveis()
+    return {'imoveis': dados_imoveis}, 200

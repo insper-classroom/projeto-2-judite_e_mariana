@@ -39,20 +39,20 @@ DICIONARIO_IMOVEIS = [
 
 
 #testar função que lista todos os imoveis e seus atributos
-def test_listar_imoveis():
-    with patch('servidor.listar_imoveis', DICIONARIO_IMOVEIS):
+def test_listar_imoveis(client):
+   with patch('servidor.imoveis', return_value=DICIONARIO_IMOVEIS):
         response = client.get('/imoveis')
         response_json = response.get_json()
-        assert response.status_code == 200
-        for k in response_json.keys():
-            assert response_json[k] == DICIONARIO_IMOVEIS[0][k]
 
-def test_list_imoveis_faltando_atributos():
-    with patch('servidor.listar_imoveis', DICIONARIO_IMOVEIS):
+        assert response.status_code == 200
+        assert response_json['imoveis'] == DICIONARIO_IMOVEIS
+
+def test_list_imoveis_faltando_atributos(client):
+    with patch('servidor.imoveis', return_value=DICIONARIO_IMOVEIS):
         response = client.get('/imoveis')
         response_json = response.get_json()
         assert response.status_code == 200
-        for k in response_json.keys():
+        for k in response_json['imoveis'][0].keys():
             assert k in DICIONARIO_IMOVEIS[0]
 
 def test_get_imovel_por_id_existente(client):
