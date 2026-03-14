@@ -46,12 +46,12 @@ def test_get_imoveis(mock_connect_db, client):
     # Configurandos o Mock para retornar o cursor quando chamarmos conn.cursor()
     mock_conn.cursor.return_value = mock_cursor
     
-    # Simulandos o retorno do banco de dados
+    # Simulando o retorno do banco de dados
     mock_cursor.fetchall.return_value = [ (1, 'Nicole Common', 'Travessa', 'Lake Danielle', 'Judymouth', '85184', 'casa em condominio', 488424, '2017-07-29'),
                                         (2, 'Price Prairie', 'Travessa', 'Colonton', 'North Garyville', '93354', 'casa em condominio', 260070, '2021-11-30') 
                                         ]
     
-    # Substituíndos a função `connect_db` para retornar nosso Mock em vez de uma conexão real
+    # Substituíndo a função `connect_db` para retornar nosso Mock em vez de uma conexão real
     mock_connect_db.return_value = mock_conn
     
     # Fazendo requisição para a api
@@ -109,4 +109,66 @@ def test_get_imovel_por_id_existente(client):
     # Verifica a resposta
     assert response.status_code == 200
     assert response.get_json() == DICIONARIO_IMOVEIS[0]
+   
+@patch("servidor.connect_db") 
+def test_new_imovel(mock_connect_db, client):
+    # Criandos um Mock para a conexão e o cursor
+    mock_conn = MagicMock()
+    mock_cursor = MagicMock()
     
+    # Configurandos o Mock para retornar o cursor quando chamarmos conn.cursor()
+    mock_conn.cursor.return_value = mock_cursor
+    
+    # Substituíndo a função `connect_db` para retornar nosso Mock em vez de uma conexão real
+    mock_connect_db.return_value = mock_conn
+    
+    # Dados que serão enviados para a API
+    new_imovel = {
+        'logradouro': 'Taylor Ranch',
+        'tipo_logradouro': 'Avenida',
+        'bairro': 'West Jennashire',
+        'cidade': 'Katherinefurt',
+        'cep': '51116',
+        'tipo': 'apartamento',
+        'valor': 815970,
+        'data_aquisicao': '2020-04-24'
+    }
+    
+    # Fazendo requisição para a api
+    response = client.post('/submit', json=new_imovel)
+    
+    # verificando se o código de status retornou 200
+    assert response.status_code == 200
+    
+    # Verificandos se os dados retornados estão corretos
+    expected_response = {
+        'id': int(3),
+        'logradouro': 'Taylor Ranch',
+        'tipo_logradouro': 'Avenida',
+        'bairro': 'West Jennashire',
+        'cidade': 'Katherinefurt',
+        'cep': '51116',
+        'tipo': 'apartamento',
+        'valor': float(815970),
+        'data_aquisicao': '2020-04-24'
+    }
+
+    assert response.get_json() == expected_response
+
+    # Verificandos se a consulta SQL foi executada corretamente
+    mock_cursor.execute.assert_called_once_with(
+        "INSERT INTO imoveis (logradouro, tipo_logradouro, bairro, cidade, cep, tipo, valor, data_aquisicao) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+        (
+            'Taylor Ranch',
+            'Avenida',
+            'West Jennashire',
+            'Katherinefurt',
+            '51116',
+            'apartamento',
+            815970,
+            '2020-04-24'
+        )
+    )
+    
+    # Verificandos se a transação foi confirmada
+    mock_conn.commit.assert_called_once()
