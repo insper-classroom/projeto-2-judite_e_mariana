@@ -12,7 +12,7 @@ def client():
         yield client
 
 # variavel global para simular o banco de dados
-DICIONARIO_IMOVEIS = [
+DICIONARIO_IMOVEIS = { 'imoveis': [
         {
             'id': int(1),
             'logradouro': 'Nicole Common',
@@ -35,36 +35,57 @@ DICIONARIO_IMOVEIS = [
             'valor': float(260070),
             'data_aquisicao': '2021-11-30',  
         }
-]
+] }
 
+@patch("servidor.connect_db")
+def test_get_imoveis(mock_connect_db, client):
+    # Criandos um Mock para a conexão e o cursor
+    mock_conn = MagicMock()
+    mock_cursor = MagicMock()
+    
+    # Configurandos o Mock para retornar o cursor quando chamarmos conn.cursor()
+    mock_conn.cursor.return_value = mock_cursor
+    
+    # Simulandos o retorno do banco de dados
+    mock_cursor.fetchall.return_value = [ (1, 'Nicole Common', 'Travessa', 'Lake Danielle', 'Judymouth', '85184', 'casa em condominio', 488424, '2017-07-29'),
+                                        (2, 'Price Prairie', 'Travessa', 'Colonton', 'North Garyville', '93354', 'casa em condominio', 260070, '2021-11-30') 
+                                        ]
+    
+    # Substituíndos a função `connect_db` para retornar nosso Mock em vez de uma conexão real
+    mock_connect_db.return_value = mock_conn
+    
+    # Fazendo requisição para a api
+    response = client.get('/imoveis')
+    
+    #verificando se o código de status retornou 200
+    assert response.status_code == 200
+    
+    # Verificandos se os dados retornados estão corretos
+    expected_response = DICIONARIO_IMOVEIS
+    assert response.get_json() == expected_response
 
-#testar função que lista todos os imoveis e seus atributos
-def test_listar_imoveis(client):
-    #mockando db
-   with patch('servidor.imoveis', return_value=DICIONARIO_IMOVEIS):
-       #pegando resposta da api
-        response = client.get('/imoveis')
-        response_json = response.get_json()
+    # Verificandos se a consulta SQL foi executada corretamente
+    mock_cursor.execute.assert_called_once_with("SELECT * FROM imoveis")
 
-        #verificando se o código de status retornou 200
-        assert response.status_code == 200
-        
-        #verificando se a api listou corretamente os imoveis
-        assert response_json['imoveis'] == DICIONARIO_IMOVEIS
+@patch("servidor.connect_db")
+def test_get_imoveis_vazio(mock_connect_db, client):
+    # Criandos um Mock para a conexão e o cursor
+    mock_conn = MagicMock()
+    mock_cursor = MagicMock()
+    mock_conn.cursor.return_value = mock_cursor
 
-def test_list_imoveis_faltando_atributos(client):
-    #mockando db
-    with patch('servidor.imoveis', return_value=DICIONARIO_IMOVEIS):
-        #pegando resposta da api
-        response = client.get('/imoveis')
-        response_json = response.get_json()
-        
-        #verificando se o código de status retornou 200
-        assert response.status_code == 200
-        
-        #verificando se a api listou faltando algum atributo do imovel
-        for k in response_json['imoveis'][0].keys():
-            assert k in DICIONARIO_IMOVEIS[0]
+    # Simulando que o banco de dados não retorna nenhum imovel
+    mock_cursor.fetchall.return_value = []
+
+    mock_connect_db.return_value = mock_conn
+
+    # Fazendos a requisição para a API
+    response = client.get("/imoveis")
+
+    # Verificandos se o código de status da resposta é 404 e se a mensagem de erro está correta
+    assert response.status_code == 404
+    assert response.get_json() == {"erro": "Nenhum imovel encontrado"}
+    
 
 def test_get_imovel_por_id_existente(client):
     # Teste retorna 200 com os atributos do imóvel
@@ -88,5 +109,4 @@ def test_get_imovel_por_id_existente(client):
     # Verifica a resposta
     assert response.status_code == 200
     assert response.get_json() == DICIONARIO_IMOVEIS[0]
-    
     

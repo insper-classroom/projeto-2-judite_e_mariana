@@ -3,9 +3,6 @@ import os
 import mysql.connector
 from mysql.connector import Error
 from dotenv import load_dotenv
-from views import *
-
-app = Flask(__name__)
 
 
 # Carrega as variáveis de ambiente do arquivo .cred (se disponível)
@@ -34,9 +31,45 @@ def connect_db():
         # Em caso de erro, imprime a mensagem de erro
         print(f"Erro: {err}")
         return None
+    
+app = Flask(__name__)
 
 @app.route('/imoveis', methods=['GET'])
-def listar_imoveis():
-    #pega o dicionario de imoveis e retorna ele com status code 200
-    dados_imoveis = imoveis()
-    return {'imoveis': dados_imoveis}, 200
+def get_imoveis():
+    #conecta ao db
+    conn = connect_db()
+    
+    if conn is None:
+        return {"erro": "Erro ao conectar ao banco de dados"}, 500
+    
+    cursor = conn.cursor()
+    
+    #seleciona os imoveis do banco de dados
+    cursor.execute("SELECT * FROM imoveis")
+    
+    results = cursor.fetchall()
+    if not results:
+        resp = {"erro": "Nenhum imovel encontrado"}
+        return resp, 404
+    else:
+        imoveis = []
+        for imovel in results:
+            dic_imovel = {
+                'id': imovel[0],
+                'logradouro': imovel[1],
+                'tipo_logradouro': imovel[2],
+                'bairro': imovel[3],
+                'cidade': imovel[4],
+                'cep': imovel[5],
+                'tipo': imovel[6],
+                'valor': float(imovel[7]),
+                'data_aquisicao': str(imovel[8])
+            }
+            imoveis.append(dic_imovel)
+    
+    conn.close()
+    return {"imoveis": imoveis}, 200
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
