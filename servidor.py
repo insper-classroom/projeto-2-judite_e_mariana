@@ -129,9 +129,6 @@ def new_imovel():
     )
 )
     
-    if request.json['logradouro'] == '' or request.json['tipo_logradouro'] == '' or request.json['bairro'] == '' or request.json['cidade'] == '' or request.json['cep'] == '' or request.json['tipo'] == '' or request.json['valor'] == '' or request.json['data_aquisicao'] == '':
-        return {"erro": "Dados incompletos"}, 400
-    
     conn.commit()
     conn.close()
     return {"mensagem": "Imóvel cadastrado com sucesso"}, 200
