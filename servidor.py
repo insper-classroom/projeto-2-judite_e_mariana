@@ -125,6 +125,34 @@ def new_imovel():
     conn.close()
     return {"mensagem": "Imóvel cadastrado com sucesso"}, 200
 
+@app.route('/imoveis/<int:id>', methods=['PUT'])
+def put_imovel(id):
+    conn = connect_db()
+
+    if conn == None:
+        return {"erro": "Erro ao conectar ao banco de dados"}, 500
+
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM imoveis WHERE id = %s", (id,))
+    result = cursor.fetchone()
+    
+    if result is None:
+        return {"erro": "Imóvel não encontrado"}, 404
+
+    cursor.execute("UPDATE imoveis SET logradouro = %s, tipo_logradouro = %s, bairro = %s, cidade= %s, cep = %s, tipo = %s, valor = %s, data_aquisicao = %s WHERE id = %s", 
+    (request.json['logradouro'],
+    request.json['tipo_logradouro'],
+    request.json['bairro'],
+    request.json['cidade'],
+    request.json['cep'],
+    request.json['tipo'],
+    request.json['valor'],
+    request.json['data_aquisicao'],
+    id))
+    
+    conn.commit()
+    conn.close()
+    return request.json, 200
 
 
 if __name__ == '__main__':
