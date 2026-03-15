@@ -302,3 +302,31 @@ def test_imovel_atualizar_erro_db(mock_connect_db, client):
 
     assert response.status_code == 500
     assert response.get_json() == {"erro": "Erro ao conectar ao banco de dados"}
+    
+@patch("servidor.connect_db")
+def test_del_imovel(mock_connect_db, client):
+    # Criandos um Mock para a conexão e o cursor
+    mock_conn = MagicMock()
+    mock_cursor = MagicMock()
+    
+    # Configurandos o Mock para retornar o cursor quando chamarmos conn.cursor()
+    mock_conn.cursor.return_value = mock_cursor
+
+    # Substituíndo a função `connect_db` para retornar nosso Mock em vez de uma conexão real
+    mock_connect_db.return_value = mock_conn
+
+    # Simula o banco retornando o primeiro imóvel
+    mock_cursor.fetchone.return_value = (1, 'Nicole Common', 'Travessa', 'Lake Danielle', 'Judymouth', '85184', 'casa em condominio', 488424, '2017-07-29')
+
+    # Fazendo requisição para a api
+    response = client.delete("/imoveis/1")
+
+    # verificando se o código de status retornou 200
+    assert response.status_code == 200
+    assert response.get_json() == {"mensagem": "Imóvel deletado com sucesso"}
+
+    # Verificandos se a consulta SQL foi executada corretamente
+    mock_cursor.execute.assert_any_call("SELECT * FROM imoveis WHERE id = %s", (id,))
+    mock_cursor.execute.assert_any_call("DELETE FROM imoveis WHERE id = %s", (1,))
+    mock_conn.commit.assert_called_once()
+    mock_conn.close.assert_called_once()
