@@ -3,7 +3,7 @@ import os
 import mysql.connector
 from mysql.connector import Error
 from dotenv import load_dotenv
-from views import *
+
 
 # Carrega as variáveis de ambiente do arquivo .cred (se disponível)
 load_dotenv('.cred')
@@ -31,6 +31,69 @@ def connect_db():
         # Em caso de erro, imprime a mensagem de erro
         print(f"Erro: {err}")
         return None
-
-
+    
 app = Flask(__name__)
+
+@app.route('/imoveis', methods=['GET'])
+def get_imoveis():
+    #conecta ao db
+    conn = connect_db()
+    
+    if conn is None:
+        return {"erro": "Erro ao conectar ao banco de dados"}, 500
+    
+    cursor = conn.cursor()
+    
+    #seleciona os imoveis do banco de dados
+    cursor.execute("SELECT * FROM imoveis")
+    
+    results = cursor.fetchall()
+    if not results:
+        resp = {"erro": "Nenhum imovel encontrado"}
+        return resp, 404
+    else:
+        imoveis = []
+        for imovel in results:
+            dic_imovel = {
+                'id': imovel[0],
+                'logradouro': imovel[1],
+                'tipo_logradouro': imovel[2],
+                'bairro': imovel[3],
+                'cidade': imovel[4],
+                'cep': imovel[5],
+                'tipo': imovel[6],
+                'valor': float(imovel[7]),
+                'data_aquisicao': str(imovel[8])
+            }
+            imoveis.append(dic_imovel)
+    
+    conn.close()
+    return {"imoveis": imoveis}, 200
+
+@app.route('/submit', methods=['POST'])
+def new_imovel():
+    # verifica se os dados estão incompletos antes de acessar o banco de dados
+    if not request.json or request.json.get('logradouro') == '' or request.json.get('tipo_logradouro') == '' or request.json.get('bairro') == '' or request.json.get('cidade') == '' or request.json.get('cep') == '' or request.json.get('tipo') == '' or request.json.get('valor') == '' or request.json.get('data_aquisicao') == '':
+        return {"erro": "Dados incompletos"}, 400
+    
+    #conecta ao db
+    conn = connect_db()
+    
+    if conn is None:
+        return {"erro": "Erro ao conectar ao banco de dados"}, 500
+    
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO imoveis (logradouro, tipo_logradouro, bairro, cidade, cep, tipo, valor, data_aquisicao) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                   (request.json['logradouro'], request.json['tipo_logradouro'], request.json['bairro'], request.json['cidade'], request.json['cep'], request.json['tipo'], request.json['valor'], request.json['data_aquisicao']))
+    
+    if request.json['logradouro'] == '' or request.json['tipo_logradouro'] == '' or request.json['bairro'] == '' or request.json['cidade'] == '' or request.json['cep'] == '' or request.json['tipo'] == '' or request.json['valor'] == '' or request.json['data_aquisicao'] == '':
+        return {"erro": "Dados incompletos"}, 400
+    
+    conn.commit()
+    conn.close()
+    return {"mensagem": "Imóvel cadastrado com sucesso"}, 200
+
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
