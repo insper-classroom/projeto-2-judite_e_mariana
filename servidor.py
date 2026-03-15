@@ -115,8 +115,19 @@ def new_imovel():
         return {"erro": "Erro ao conectar ao banco de dados"}, 500
     
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO imoveis (logradouro, tipo_logradouro, bairro, cidade, cep, tipo, valor, data_aquisicao) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                   (request.json['logradouro'], request.json['tipo_logradouro'], request.json['bairro'], request.json['cidade'], request.json['cep'], request.json['tipo'], request.json['valor'], request.json['data_aquisicao']))
+    cursor.execute(
+    "INSERT INTO imoveis (logradouro, tipo_logradouro, bairro, cidade, cep, tipo, valor, data_aquisicao) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+    (
+        request.json['logradouro'],
+        request.json['tipo_logradouro'],
+        request.json['bairro'],
+        request.json['cidade'],
+        request.json['cep'],
+        request.json['tipo'],
+        request.json['valor'],
+        request.json['data_aquisicao']
+    )
+)
     
     if request.json['logradouro'] == '' or request.json['tipo_logradouro'] == '' or request.json['bairro'] == '' or request.json['cidade'] == '' or request.json['cep'] == '' or request.json['tipo'] == '' or request.json['valor'] == '' or request.json['data_aquisicao'] == '':
         return {"erro": "Dados incompletos"}, 400
