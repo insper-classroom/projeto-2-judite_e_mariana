@@ -101,14 +101,36 @@ def test_get_imovel_por_id_existente(client):
         mock_conn.cursor.return_value = mock_cursor
 
         # Simula o banco retornando o primeiro imóvel
-        mock_cursor.fetchone.return_value = DICIONARIO_IMOVEIS[0]
+        mock_cursor.fetchone.return_value = (1, 'Nicole Common', 'Travessa', 'Lake Danielle', 'Judymouth', '85184', 'casa em condominio', 488424, '2017-07-29')
 
         # Faz a requisição para a API
         response = client.get("/imoveis/1")
 
     # Verifica a resposta
     assert response.status_code == 200
-    assert response.get_json() == DICIONARIO_IMOVEIS[0]
+    assert response.get_json() == DICIONARIO_IMOVEIS['imoveis'][0]
+
+def test_get_imovel_id_inexistente(client):
+    # Retorna 404 quando o imóvel não existe
+    with patch('servidor.connect_db') as mock_connect_db:
+
+        # Mock para a conexão e o cursor
+        mock_conn = MagicMock()
+        mock_cursor = MagicMock()
+
+        # Mock para retornar o cursor quando chamarmos conn.cursor()
+        mock_connect_db.return_value = mock_conn
+        mock_conn.cursor.return_value = mock_cursor
+
+        # Simula o banco retornando nenhum valor
+        mock_cursor.fetchone.return_value = None
+
+        # Faz a requisição para a API
+        response = client.get("/imoveis/999")
+
+    # Verifica a resposta
+    assert response.status_code == 404
+    assert response.get_json() == {"erro": "Imóvel não encontrado"}
    
 @patch("servidor.connect_db") 
 def test_new_imovel(mock_connect_db, client):
