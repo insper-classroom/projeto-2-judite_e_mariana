@@ -1,3 +1,5 @@
+from urllib import response
+
 from servidor import *
 from unittest.mock import patch, MagicMock
 import pytest
@@ -23,6 +25,12 @@ DICIONARIO_IMOVEIS = { 'imoveis': [
             'tipo': 'casa em condominio',
             'valor': float(488424),
             'data_aquisicao': '2017-07-29',
+            '_links': {
+                    'self': f'/imoveis/1',
+                    'update': f'/imoveis/1',
+                    'delete': f'/imoveis/1',
+                    'collection': '/imoveis'
+                }
         },
         {
             'id': int(2),
@@ -34,6 +42,12 @@ DICIONARIO_IMOVEIS = { 'imoveis': [
             'tipo': 'casa em condominio',
             'valor': float(260070),
             'data_aquisicao': '2021-11-30',  
+            '_links': {
+                    'self': f'/imoveis/2',
+                    'update': f'/imoveis/2',
+                    'delete': f'/imoveis/2',
+                    'collection': '/imoveis'
+                }
         }
 ] }
 
@@ -187,11 +201,14 @@ def test_new_imovel(mock_connect_db, client):
     # Fazendo requisição para a api
     response = client.post('/submit', json=new_imovel)
     
-    # verificando se o código de status retornou 200
-    assert response.status_code == 200
+    # verificando se o código de status retornou 201
+    assert response.status_code == 201
     
     # Verificando se os dados retornados estão corretos
-    expected_response = {"mensagem": "Imóvel cadastrado com sucesso"}
+    expected_response = {
+    "mensagem": "Imóvel cadastrado com sucesso", 
+    "_links": {"all": "/imoveis"}
+    }
 
     assert response.get_json() == expected_response
 
@@ -296,7 +313,18 @@ def test_imovel_atualizar_com_sucesso(mock_connect_db,client):
 
     # Verifica se a resposta está certa
     assert response.status_code == 200
-    assert response.get_json() == imovel_atualizado
+    
+    # Verificando se os dados retornados estão corretos
+    expected_response = {
+        **imovel_atualizado,
+        "_links": {
+            "self": "/imoveis/1",
+            "delete": "/imoveis/1",
+            "all": "/imoveis"
+        }
+    }
+
+    assert response.get_json() == expected_response
 
     # Verifica se o SELECT foi executado
     mock_cursor.execute.assert_any_call("SELECT * FROM imoveis WHERE id = %s", (1,))
@@ -361,7 +389,17 @@ def test_del_imovel(mock_connect_db, client):
 
     # verificando se o código de status retornou 200
     assert response.status_code == 200
-    assert response.get_json() == {"mensagem": "Imóvel deletado com sucesso"}
+    
+    # Verificando se os dados retornados estão corretos
+    expected_response = {
+        "mensagem": "Imóvel deletado com sucesso",
+        "_links": {
+            "all": "/imoveis",
+            "create": "/submit"
+        }
+    }
+
+    assert response.get_json() == expected_response
 
     # Verificandos se a consulta SQL foi executada corretamente
     mock_cursor.execute.assert_any_call("SELECT * FROM imoveis WHERE id = %s", (1,))
