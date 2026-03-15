@@ -70,6 +70,38 @@ def get_imoveis():
     conn.close()
     return {"imoveis": imoveis}, 200
 
+
+@app.route('/imoveis/<int:id>', methods=['GET'])
+def get_imovel_por_id(id):
+    # conectar com a base de dados
+    conn = connect_db()
+
+    if conn is None:
+        return {"erro": "Erro ao conectar ao banco de dados"}, 500
+
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM imoveis WHERE id = %s", (id,))
+    result = cursor.fetchone()
+
+    if result is None:
+        return {"erro": "Imóvel não encontrado"}, 404
+        
+    imovel = {
+        'id': result[0],
+        'logradouro': result[1],
+        'tipo_logradouro': result[2],
+        'bairro': result[3],
+        'cidade': result[4],
+        'cep': result[5],
+        'tipo': result[6],
+        'valor': float(result[7]),
+        'data_aquisicao': str(result[8])
+    }
+
+    conn.close()
+    return imovel, 200
+
+
 @app.route('/submit', methods=['POST'])
 def new_imovel():
     # verifica se os dados estão incompletos antes de acessar o banco de dados
