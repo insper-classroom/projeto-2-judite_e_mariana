@@ -86,6 +86,19 @@ def test_get_imoveis_vazio(mock_connect_db, client):
     assert response.status_code == 404
     assert response.get_json() == {"erro": "Nenhum imovel encontrado"}
     
+    
+@patch("servidor.connect_db")
+def test_get_imoveis_erro_conexao(mock_connect_db, client):
+    # Simula erro de conexão
+    mock_connect_db.return_value = None
+
+    # Fazendo requisição para a api
+    response = client.get("/imoveis")
+
+    # verificando se o código de status retornou 500
+    assert response.status_code == 500
+    assert response.get_json() == {"erro": "Erro ao conectar ao banco de dados"}
+    
 
 def test_get_imovel_por_id_existente(client):
     # Teste retorna 200 com os atributos do imóvel
