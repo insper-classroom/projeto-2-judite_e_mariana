@@ -330,3 +330,32 @@ def test_del_imovel(mock_connect_db, client):
     mock_cursor.execute.assert_any_call("DELETE FROM imoveis WHERE id = %s", (1,))
     mock_conn.commit.assert_called_once()
     mock_conn.close.assert_called_once()
+    
+    
+@patch("servidor.connect_db")
+def test_del_imovel_nao_encontrado(mock_connect_db, client):
+    # Criandos um Mock para a conexão e o cursor
+    mock_conn = MagicMock()
+    mock_cursor = MagicMock()
+    
+    # Configurandos o Mock para retornar o cursor quando chamarmos conn.cursor()
+    mock_conn.cursor.return_value = mock_cursor
+
+    # Substituíndo a função `connect_db` para retornar nosso Mock em vez de uma conexão real
+    mock_connect_db.return_value = mock_conn
+
+    # Simula o banco retornando vazio
+    mock_cursor.fetchone.return_value = None
+    
+    # Fazendo requisição para a api
+    response = client.delete("/imoveis/999")
+    
+    # verificando se o código de status retornou 404
+    assert response.status_code == 404
+    assert response.get_json() == {"erro": "Imóvel não encontrado"}
+
+    # Verificando se a consulta de busca foi executada
+    mock_cursor.execute.assert_called_once_with("SELECT * FROM imoveis WHERE id = %s", (999,))
+    
+    # Verificando que não houve commit
+    mock_conn.commit.assert_not_called()
