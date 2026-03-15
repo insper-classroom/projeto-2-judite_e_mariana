@@ -154,6 +154,32 @@ def put_imovel(id):
     conn.close()
     return request.json, 200
 
+@app.route('/imoveis/<int:id>', methods=['DELETE'])
+def delete_imovel(id):
+    # conectando ao db
+    conn = connect_db()
+
+    # verificando se a conexão foi estabelecida com sucesso
+    if conn == None:
+        return {"erro": "Erro ao conectar ao banco de dados"}, 500
+
+    # verificando se o imóvel existe antes de tentar deletar
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM imoveis WHERE id = %s", (id,))
+    result = cursor.fetchone()
+    
+    # Adiconando erro caso o imóvel não seja encontrado
+    if result is None:
+        return {"erro": "Imóvel não encontrado"}, 404
+
+    # Deletando o imóvel do banco de dados
+    cursor.execute("DELETE FROM imoveis WHERE id = %s", (id,))
+    
+    # Confirmando a transação e fechando a conexão com o banco de dados
+    conn.commit()
+    conn.close()
+    return {"mensagem": "Imóvel deletado com sucesso"}, 200
+
 
 if __name__ == '__main__':
     app.run(debug=True)
