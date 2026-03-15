@@ -77,28 +77,26 @@ def get_imovel_por_id(id):
     conn = connect_db()
 
     if conn is None:
-        resp = {"erro": "Erro ao conectar ao banco de dados"}
-        return resp, 500
+        return {"erro": "Erro ao conectar ao banco de dados"}, 500
 
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM imoveis WHERE id = %s", (id,))
     result = cursor.fetchone()
 
     if result is None:
-        resp = {"erro": "Imóvel não encontrado"}
-        return resp, 404
-    else:
-        imovel = {
-            'id': result[0],
-            'logradouro': result[1],
-            'tipo_logradouro': result[2],
-            'bairro': result[3],
-            'cidade': result[4],
-            'cep': result[5],
-            'tipo': result[6],
-            'valor': float(result[7]),
-            'data_aquisicao': str(result[8])
-        }
+        return {"erro": "Imóvel não encontrado"}, 404
+        
+    imovel = {
+        'id': result[0],
+        'logradouro': result[1],
+        'tipo_logradouro': result[2],
+        'bairro': result[3],
+        'cidade': result[4],
+        'cep': result[5],
+        'tipo': result[6],
+        'valor': float(result[7]),
+        'data_aquisicao': str(result[8])
+    }
 
     conn.close()
     return imovel, 200
