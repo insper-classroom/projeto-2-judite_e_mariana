@@ -110,7 +110,7 @@ def test_get_imovel_por_id_existente(client):
     assert response.status_code == 200
     assert response.get_json() == DICIONARIO_IMOVEIS['imoveis'][0]
 
-def test_get_imovel_id_inexistente(client):
+def test_get_imovel_por_id_inexistente(client):
     # Retorna 404 quando o imóvel não existe
     with patch('servidor.connect_db') as mock_connect_db:
 
@@ -131,6 +131,7 @@ def test_get_imovel_id_inexistente(client):
     # Verifica a resposta
     assert response.status_code == 404
     assert response.get_json() == {"erro": "Imóvel não encontrado"}
+
 
 def test_get_imovel_id_erro_db(client):
     # Retorna 500 quando o banco de dados falha
