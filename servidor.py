@@ -63,7 +63,13 @@ def get_imoveis():
                 'cep': imovel[5],
                 'tipo': imovel[6],
                 'valor': float(imovel[7]),
-                'data_aquisicao': str(imovel[8])
+                'data_aquisicao': str(imovel[8]),
+                '_links': {
+                    'self': f'/imoveis/{imovel[0]}',
+                    'update': f'/imoveis/{imovel[0]}',
+                    'delete': f'/imoveis/{imovel[0]}',
+                    'collection': '/imoveis'
+                }
             }
             imoveis.append(dic_imovel)
     
@@ -87,16 +93,22 @@ def get_imovel_por_id(id):
         return {"erro": "Imóvel não encontrado"}, 404
         
     imovel = {
-        'id': result[0],
-        'logradouro': result[1],
-        'tipo_logradouro': result[2],
-        'bairro': result[3],
-        'cidade': result[4],
-        'cep': result[5],
-        'tipo': result[6],
-        'valor': float(result[7]),
-        'data_aquisicao': str(result[8])
+    'id': result[0],
+    'logradouro': result[1],
+    'tipo_logradouro': result[2],
+    'bairro': result[3],
+    'cidade': result[4],
+    'cep': result[5],
+    'tipo': result[6],
+    'valor': float(result[7]),
+    'data_aquisicao': str(result[8]),
+    '_links': {
+        'self': f'/imoveis/{result[0]}',
+        'update': f'/imoveis/{result[0]}',
+        'delete': f'/imoveis/{result[0]}',
+        'collection': '/imoveis'
     }
+}
 
     conn.close()
     return imovel, 200
@@ -115,15 +127,23 @@ def new_imovel():
         return {"erro": "Erro ao conectar ao banco de dados"}, 500
     
     cursor = conn.cursor()
-    cursor.execute("INSERT INTO imoveis (logradouro, tipo_logradouro, bairro, cidade, cep, tipo, valor, data_aquisicao) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                   (request.json['logradouro'], request.json['tipo_logradouro'], request.json['bairro'], request.json['cidade'], request.json['cep'], request.json['tipo'], request.json['valor'], request.json['data_aquisicao']))
-    
-    if request.json['logradouro'] == '' or request.json['tipo_logradouro'] == '' or request.json['bairro'] == '' or request.json['cidade'] == '' or request.json['cep'] == '' or request.json['tipo'] == '' or request.json['valor'] == '' or request.json['data_aquisicao'] == '':
-        return {"erro": "Dados incompletos"}, 400
+    cursor.execute(
+    "INSERT INTO imoveis (logradouro, tipo_logradouro, bairro, cidade, cep, tipo, valor, data_aquisicao) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
+    (
+        request.json['logradouro'],
+        request.json['tipo_logradouro'],
+        request.json['bairro'],
+        request.json['cidade'],
+        request.json['cep'],
+        request.json['tipo'],
+        request.json['valor'],
+        request.json['data_aquisicao']
+    )
+)
     
     conn.commit()
     conn.close()
-    return {"mensagem": "Imóvel cadastrado com sucesso"}, 200
+    return {"mensagem": "Imóvel cadastrado com sucesso", "_links": {"all": "/imoveis"}}, 201
 
 @app.route('/imoveis/<int:id>', methods=['PUT'])
 def put_imovel(id):
@@ -152,7 +172,33 @@ def put_imovel(id):
     
     conn.commit()
     conn.close()
-    return request.json, 200
+    return {**request.json, "_links": {"self": f"/imoveis/{id}", "delete": f"/imoveis/{id}", "all": "/imoveis"}}, 200
+
+@app.route('/imoveis/<int:id>', methods=['DELETE'])
+def delete_imovel(id):
+    # conectando ao db
+    conn = connect_db()
+
+    # verificando se a conexão foi estabelecida com sucesso
+    if conn == None:
+        return {"erro": "Erro ao conectar ao banco de dados"}, 500
+
+    # verificando se o imóvel existe antes de tentar deletar
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM imoveis WHERE id = %s", (id,))
+    result = cursor.fetchone()
+    
+    # Adiconando erro caso o imóvel não seja encontrado
+    if result is None:
+        return {"erro": "Imóvel não encontrado"}, 404
+
+    # Deletando o imóvel do banco de dados
+    cursor.execute("DELETE FROM imoveis WHERE id = %s", (id,))
+    
+    # Confirmando a transação e fechando a conexão com o banco de dados
+    conn.commit()
+    conn.close()
+    return {"mensagem": "Imóvel deletado com sucesso", "_links": {"all": "/imoveis", "create": "/submit"}}, 200
 
 
 if __name__ == '__main__':
