@@ -197,7 +197,7 @@ def test_new_imovel(mock_connect_db, client):
 
     # Verificandos se a consulta SQL foi executada corretamente
     mock_cursor.execute.assert_called_once_with(
-        "INSERT INTO imoveis (logradouro, tipo_logradouro, bairro, cidade, cep, tipo, valor, data_aquisicao) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    "INSERT INTO imoveis (logradouro, tipo_logradouro, bairro, cidade, cep, tipo, valor, data_aquisicao) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)",
         (
             'Taylor Ranch',
             'Avenida',
