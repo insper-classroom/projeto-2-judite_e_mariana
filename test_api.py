@@ -364,7 +364,7 @@ def test_del_imovel(mock_connect_db, client):
     assert response.get_json() == {"mensagem": "Imóvel deletado com sucesso"}
 
     # Verificandos se a consulta SQL foi executada corretamente
-    mock_cursor.execute.assert_any_call("SELECT * FROM imoveis WHERE id = %s", (id,))
+    mock_cursor.execute.assert_any_call("SELECT * FROM imoveis WHERE id = %s", (1,))
     mock_cursor.execute.assert_any_call("DELETE FROM imoveis WHERE id = %s", (1,))
     mock_conn.commit.assert_called_once()
     mock_conn.close.assert_called_once()
