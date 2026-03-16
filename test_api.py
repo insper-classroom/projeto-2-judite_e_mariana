@@ -485,7 +485,7 @@ def test_imovel_por_tipo_nao_encontrado(mock_connect_db, client):
     response = client.get("/imoveis/tipo/iglu")
 
     assert response.status_code == 404
-    assert response.get_json() == {"erro": "Tipo não encontrado"}
+    assert response.get_json() == {"erro": "Tipo de imóvel não encontrado"}
 
 
 @patch("servidor.connect_db")
