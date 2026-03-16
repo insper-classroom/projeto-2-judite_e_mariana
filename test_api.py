@@ -469,6 +469,7 @@ def test_imovel_por_tipo(mock_connect_db, client):
     # Verifica se o SELECT foi executado
     mock_cursor.execute.assert_any_call("SELECT * FROM imoveis WHERE tipo = %s", ("casa em condomínio",))
 
+
 @patch("servidor.connect_db")
 def test_imovel_por_tipo_nao_encontrado(mock_connect_db, client):
     # Configura mocks
@@ -485,3 +486,16 @@ def test_imovel_por_tipo_nao_encontrado(mock_connect_db, client):
 
     assert response.status_code == 404
     assert response.get_json() == {"erro": "Tipo não encontrado"}
+
+
+@patch("servidor.connect_db")
+def test_imovel_por_tipo_erro_db(mock_connect_db, client):
+    # Simula falha na conexão
+    mock_connect_db.return_value = None
+
+    # Faz a requisição para a API
+    response = client.get("/imoveis/tipo/casa")
+
+    # Verifica a resposta
+    assert response.status_code == 500
+    assert response.get_json() == {"erro": "Erro ao conectar ao banco de dados"}
