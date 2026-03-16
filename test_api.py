@@ -550,3 +550,15 @@ def test_imovel_por_cidade_nao_encontrada(mock_connect_db, client):
 
     assert response.status_code == 404
     assert response.get_json() == {"erro": "Cidade não encontrada"}
+
+@patch("servidor.connect_db")
+def test_imovel_por_cidade_erro_db(mock_connect_db, client):
+    # Simula falha na conexão
+    mock_connect_db.return_value = None
+
+    # Faz a requisição para a API
+    response = client.get("/imoveis/cidade/Judymouth")
+
+    # Verifica a resposta
+    assert response.status_code == 500
+    assert response.get_json() == {"erro": "Erro ao conectar ao banco de dados"}
