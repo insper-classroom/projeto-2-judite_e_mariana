@@ -499,3 +499,37 @@ def test_imovel_por_tipo_erro_db(mock_connect_db, client):
     # Verifica a resposta
     assert response.status_code == 500
     assert response.get_json() == {"erro": "Erro ao conectar ao banco de dados"}
+
+@patch("servidor.connect_db")
+def test_imovel_por_cidade(mock_connect_db, client):
+    mock_conn = MagicMock()
+    mock_cursor = MagicMock()
+
+    mock_connect_db.return_value = mock_conn
+    mock_conn.cursor.return_value = mock_cursor
+
+    expected_response = {'imóveis':[
+            {
+            'id': int(1),
+            'logradouro': 'Nicole Common',
+            'tipo_logradouro': 'Travessa',
+            'bairro': 'Lake Danielle',
+            'cidade': 'Judymouth',
+            'cep': '85184',
+            'tipo': 'casa em condominio',
+            'valor': float(488424),
+            'data_aquisicao': '2017-07-29',
+            '_links': {
+                    'self': f'/imoveis/1',
+                    'update': f'/imoveis/1',
+                    'delete': f'/imoveis/1',
+                    'collection': '/imoveis'}
+            }]}
+
+    mock_cursor.fetchall.return_value = [(1, 'Nicole Common', 'Travessa', 'Lake Danielle', 'Judymouth', '85184', 'casa em condominio', 488424, '2017-07-29')]
+
+    response = client.get("/imoveis/cidade/Judymouth")
+
+    assert response.status_code == 200
+    assert response.get_json() == expected_response
+    mock_cursor.execute.assert_any_call("SELECT * FROM imoveis WHERE cidade = %s", ("Judymouth",))
