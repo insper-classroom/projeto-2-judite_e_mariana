@@ -447,3 +447,24 @@ def test_del_imovel_erro_conexao(mock_connect_db, client):
     # verificando se o código de status retornou 500
     assert response.status_code == 500
     assert response.get_json() == {"erro": "Erro ao conectar ao banco de dados"}
+
+@patch("servidor.connect_db")
+def test_imovel_por_tipo(mock_connect_db, client):
+    # Configura mocks
+    mock_conn = MagicMock()
+    mock_cursor = MagicMock()
+
+    mock_connect_db.return_value = mock_conn
+    mock_conn.cursor.return_value = mock_cursor
+
+    expected_response = DICIONARIO_IMOVEIS
+
+    # Simula o banco retornando os imóvel de acordo com o tipo
+    mock_cursor.fetchall.return_value = [(1, 'Nicole Common', 'Travessa', 'Lake Danielle', 'Judymouth', '85184', 'casa em condominio', 488424, '2017-07-29'), (2, 'Price Prairie', 'Travessa', 'Colonton', 'North Garyville', '93354', 'casa em condominio', 260070, '2021-11-30')]
+
+    response = client.get('/imoveis/tipo/casa em condomínio')
+
+    assert response.status_code == 200
+    assert response.get_json() == expected_response
+    # Verifica se o SELECT foi executado
+    mock_cursor.execute.assert_any_call("SELECT * FROM imoveis WHERE tipo = %s", ("casa em condomínio",))
