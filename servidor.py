@@ -239,5 +239,44 @@ def imoveis_por_tipo(tipo):
     return {"imoveis": imoveis}, 200
 
 
+@app.route('/imoveis/cidade/<string:cidade>', methods=['GET'])
+def imoveis_por_cidade(cidade):
+    conn = connect_db()
+
+    if conn == None:
+        return {"erro": "Erro ao conectar ao banco de dados"}, 500
+
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM imoveis WHERE cidade = %s", (cidade,))
+    result = cursor.fetchall()
+    
+    if not result:
+        return {"erro": "Cidade não encontrada"}, 404
+
+    imoveis = []
+    for imovel in result:
+        dic_imovel = {
+            'id': imovel[0],
+            'logradouro': imovel[1],
+            'tipo_logradouro': imovel[2],
+            'bairro': imovel[3],
+            'cidade': imovel[4],
+            'cep': imovel[5],
+            'tipo': imovel[6],
+            'valor': float(imovel[7]),
+            'data_aquisicao': str(imovel[8]),
+            '_links': {
+                'self': f'/imoveis/{imovel[0]}',
+                'update': f'/imoveis/{imovel[0]}',
+                'delete': f'/imoveis/{imovel[0]}',
+                'collection': '/imoveis'
+            }
+        }
+        imoveis.append(dic_imovel)
+
+    conn.close()
+    return {"imóveis": imoveis}, 200
+
+
 if __name__ == '__main__':
     app.run(debug=True)
