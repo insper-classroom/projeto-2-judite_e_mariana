@@ -468,3 +468,20 @@ def test_imovel_por_tipo(mock_connect_db, client):
     assert response.get_json() == expected_response
     # Verifica se o SELECT foi executado
     mock_cursor.execute.assert_any_call("SELECT * FROM imoveis WHERE tipo = %s", ("casa em condomínio",))
+
+@patch("servidor.connect_db")
+def test_imovel_por_tipo_nao_encontrado(mock_connect_db, client):
+    # Configura mocks
+    mock_conn = MagicMock()
+    mock_cursor = MagicMock()
+
+    mock_connect_db.return_value = mock_conn
+    mock_conn.cursor.return_value = mock_cursor
+
+    # Retorna uma lista vazia
+    mock_cursor.fetchall.return_value = []
+
+    response = client.get("/imoveis/tipo/iglu")
+
+    assert response.status_code == 404
+    assert response.get_json() == {"erro": "Tipo não encontrado"}
