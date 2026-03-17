@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 
 
 # Carrega as variáveis de ambiente do arquivo .cred (se disponível)
-load_dotenv('.cred')
+load_dotenv('.env')
 
 # Configurações para conexão com o banco de dados usando variáveis de ambiente
 config = {
