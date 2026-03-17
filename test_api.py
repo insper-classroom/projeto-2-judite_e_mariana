@@ -28,7 +28,7 @@ DICIONARIO_IMOVEIS = { 'imoveis': [
             '_links': {
                     'self': f'/imoveis/1',
                     'update': f'/imoveis/1',
-                    'delete': f'/imoveis/1',
+                    'delete': f'/imoveis/delete/1',
                     'collection': '/imoveis'
                 }
         },
@@ -45,7 +45,7 @@ DICIONARIO_IMOVEIS = { 'imoveis': [
             '_links': {
                     'self': f'/imoveis/2',
                     'update': f'/imoveis/2',
-                    'delete': f'/imoveis/2',
+                    'delete': f'/imoveis/delete/2',
                     'collection': '/imoveis'
                 }
         }
@@ -319,7 +319,7 @@ def test_imovel_atualizar_com_sucesso(mock_connect_db,client):
         **imovel_atualizado,
         "_links": {
             "self": "/imoveis/1",
-            "delete": "/imoveis/1",
+            "delete": "/imoveis/delete/1",
             "all": "/imoveis"
         }
     }
@@ -385,7 +385,7 @@ def test_del_imovel(mock_connect_db, client):
     mock_cursor.fetchone.return_value = (1, 'Nicole Common', 'Travessa', 'Lake Danielle', 'Judymouth', '85184', 'casa em condominio', 488424, '2017-07-29')
 
     # Fazendo requisição para a api
-    response = client.delete("/imoveis/1")
+    response = client.delete("/imoveis/delete/1")
 
     # verificando se o código de status retornou 200
     assert response.status_code == 200
@@ -424,7 +424,7 @@ def test_del_imovel_nao_encontrado(mock_connect_db, client):
     mock_cursor.fetchone.return_value = None
     
     # Fazendo requisição para a api
-    response = client.delete("/imoveis/999")
+    response = client.delete("/imoveis/delete/999")
     
     # verificando se o código de status retornou 404
     assert response.status_code == 404
@@ -442,7 +442,7 @@ def test_del_imovel_erro_conexao(mock_connect_db, client):
     mock_connect_db.return_value = None
 
     # Fazendo requisição para a api
-    response = client.delete("/imoveis/1")
+    response = client.delete("/imoveis/delete/1")
 
     # verificando se o código de status retornou 500
     assert response.status_code == 500
@@ -522,7 +522,7 @@ def test_imovel_por_cidade(mock_connect_db, client):
             '_links': {
                     'self': f'/imoveis/1',
                     'update': f'/imoveis/1',
-                    'delete': f'/imoveis/1',
+                    'delete': f'/imoveis/delete/1',
                     'collection': '/imoveis'}
             }]}
 
