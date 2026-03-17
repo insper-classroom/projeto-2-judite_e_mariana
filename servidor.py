@@ -275,7 +275,7 @@ def imoveis_por_cidade(cidade):
         imoveis.append(dic_imovel)
 
     conn.close()
-    return {"imóveis": imoveis}, 200
+    return {"imoveis": imoveis}, 200
 
 
 if __name__ == '__main__':

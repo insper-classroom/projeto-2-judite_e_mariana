@@ -508,7 +508,7 @@ def test_imovel_por_cidade(mock_connect_db, client):
     mock_connect_db.return_value = mock_conn
     mock_conn.cursor.return_value = mock_cursor
 
-    expected_response = {'imóveis':[
+    expected_response = {'imoveis':[
             {
             'id': int(1),
             'logradouro': 'Nicole Common',
