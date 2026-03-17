@@ -114,7 +114,7 @@ def get_imovel_por_id(id):
     return imovel, 200
 
 
-@app.route('/submit', methods=['POST'])
+@app.route('/imoveis', methods=['POST'])
 def new_imovel():
     # verifica se os dados estão incompletos antes de acessar o banco de dados
     if not request.json or request.json.get('logradouro') == '' or request.json.get('tipo_logradouro') == '' or request.json.get('bairro') == '' or request.json.get('cidade') == '' or request.json.get('cep') == '' or request.json.get('tipo') == '' or request.json.get('valor') == '' or request.json.get('data_aquisicao') == '':
@@ -198,7 +198,7 @@ def delete_imovel(id):
     # Confirmando a transação e fechando a conexão com o banco de dados
     conn.commit()
     conn.close()
-    return {"mensagem": "Imóvel deletado com sucesso", "_links": {"all": "/imoveis", "create": "/submit"}}, 200
+    return {"mensagem": "Imóvel deletado com sucesso", "_links": {"all": "/imoveis", "create": "/imoveis"}}, 200
 
 @app.route('/imoveis/tipo/<string:tipo>', methods=['GET'])
 def imoveis_por_tipo(tipo):

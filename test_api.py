@@ -199,7 +199,7 @@ def test_new_imovel(mock_connect_db, client):
     }
     
     # Fazendo requisição para a api
-    response = client.post('/submit', json=new_imovel)
+    response = client.post('/imoveis', json=new_imovel)
     
     # verificando se o código de status retornou 201
     assert response.status_code == 201
@@ -246,7 +246,7 @@ def test_new_imovel_vazio(mock_connect_db, client):
     new_imovel_vazio = {}
     
     # Fazendo requisição para a api
-    response = client.post('/submit', json=new_imovel_vazio)
+    response = client.post('/imoveis', json=new_imovel_vazio)
     
     # verificando se o código de status retornou 400
     assert response.status_code == 400
@@ -276,7 +276,7 @@ def test_new_imovel_erro_conexao(mock_connect_db, client):
     }
 
     # Fazendo requisição para a api
-    response = client.post("/submit", json=new_imovel)
+    response = client.post("/imoveis", json=new_imovel)
 
     # verificando se o código de status retornou 500
     assert response.status_code == 500
@@ -395,7 +395,7 @@ def test_del_imovel(mock_connect_db, client):
         "mensagem": "Imóvel deletado com sucesso",
         "_links": {
             "all": "/imoveis",
-            "create": "/submit"
+            "create": "/imoveis"
         }
     }
 
