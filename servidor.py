@@ -67,7 +67,7 @@ def get_imoveis():
                 '_links': {
                     'self': f'/imoveis/{imovel[0]}',
                     'update': f'/imoveis/{imovel[0]}',
-                    'delete': f'/imoveis/{imovel[0]}',
+                    'delete': f'/imoveis/delete/{imovel[0]}',
                     'collection': '/imoveis'
                 }
             }
@@ -105,7 +105,7 @@ def get_imovel_por_id(id):
     '_links': {
         'self': f'/imoveis/{result[0]}',
         'update': f'/imoveis/{result[0]}',
-        'delete': f'/imoveis/{result[0]}',
+        'delete': f'/imoveis/delete/{result[0]}',
         'collection': '/imoveis'
     }
 }
@@ -172,9 +172,9 @@ def put_imovel(id):
     
     conn.commit()
     conn.close()
-    return {**request.json, "_links": {"self": f"/imoveis/{id}", "delete": f"/imoveis/{id}", "all": "/imoveis"}}, 200
+    return {**request.json, "_links": {"self": f"/imoveis/{id}", "delete": f"/imoveis/delete/{id}", "all": "/imoveis"}}, 200
 
-@app.route('/imoveis/<int:id>', methods=['DELETE'])
+@app.route('/imoveis/delete/<int:id>', methods=['DELETE'])
 def delete_imovel(id):
     # conectando ao db
     conn = connect_db()
@@ -229,7 +229,7 @@ def imoveis_por_tipo(tipo):
             '_links': {
                 'self': f'/imoveis/{imovel[0]}',
                 'update': f'/imoveis/{imovel[0]}',
-                'delete': f'/imoveis/{imovel[0]}',
+                'delete': f'/imoveis/delete/{imovel[0]}',
                 'collection': '/imoveis'
             }
         }
@@ -268,7 +268,7 @@ def imoveis_por_cidade(cidade):
             '_links': {
                 'self': f'/imoveis/{imovel[0]}',
                 'update': f'/imoveis/{imovel[0]}',
-                'delete': f'/imoveis/{imovel[0]}',
+                'delete': f'/imoveis/delete/{imovel[0]}',
                 'collection': '/imoveis'
             }
         }
